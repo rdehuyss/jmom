@@ -1,0 +1,9 @@
+dependencies {
+    compile project(':core:infrastructure')
+    compile project(':core:model')
+
+    provided libraries.dagger_compiler
+
+    testCompile project(path: ':core:infrastructure', configuration: 'testArtifacts')
+    testCompile project(path: ':core:model', configuration: 'testArtifacts')
+}

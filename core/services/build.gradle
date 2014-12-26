@@ -1,0 +1,12 @@
+dependencies {
+    compile project(':core:model')
+    compile ('org.dna.mqtt:moquette-broker:0.6') {
+        exclude group: 'org.apache.felix'
+    }
+    compile libraries.mqtt_client
+
+    testCompile project(path: ':core:infrastructure', configuration: 'testArtifacts')
+    testCompile project(path: ':core:model', configuration: 'testArtifacts')
+
+    provided libraries.dagger_compiler
+}

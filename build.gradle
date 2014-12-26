@@ -1,0 +1,84 @@
+ext.libraries = [
+        dagger          : 'com.squareup.dagger:dagger:1.2.2',
+        dagger_compiler : 'com.squareup.dagger:dagger-compiler:1.2.2',
+        joda_time 	    : 'joda-time:joda-time:2.3',
+        guava     	    : 'com.google.guava:guava:18.0',
+        jackson         : 'com.fasterxml.jackson.core:jackson-databind:2.4.4',
+        jackson_smile   : 'com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.4.4',
+        slf_api   	    : 'org.slf4j:slf4j-api:1.7.7',
+        slf_simple	    : 'org.slf4j:slf4j-simple:1.7.7',
+        mqtt_server     : 'org.dna.mqtt:moquette-broker:0.6',
+	    mqtt_client     : 'org.eclipse.paho:mqtt-client:0.4.0',
+]
+
+buildscript {
+
+    dependencies {
+        classpath 'me.tatarka:gradle-retrolambda:2.5.0'
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url 'http://www.jmom.org/nexus/content/groups/public' }
+        jcenter()
+    }
+}
+
+subprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url 'http://www.jmom.org/nexus/content/groups/public'
+        }
+        maven {
+            url 'http://dl.bintray.com/andsel/maven/'
+        }
+        maven {
+            url 'https://repo.eclipse.org/content/repositories/paho-releases/'
+        }
+    }
+}
+
+configure(subprojects - project(':apps:android')) {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'me.tatarka.retrolambda'
+
+    group = 'org.jmom'
+    version = '1.0'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    retrolambda {
+        oldJdk '/usr/lib/jvm/java-7-openjdk-amd64/'
+    }
+
+    dependencies {
+        testCompile 'junit:junit:4.12'
+        testCompile 'org.mockito:mockito-all:1.10.8'
+        testCompile 'org.assertj:assertj-core:1.7.0'
+    }
+
+    configurations {
+        testArtifacts.extendsFrom testRuntime
+        provided
+    }
+
+    sourceSets {
+        main {
+            main.compileClasspath += configurations.provided
+            test.compileClasspath += configurations.provided
+            test.runtimeClasspath += configurations.provided
+        }
+    }
+
+    task testJar(type: Jar) {
+        classifier "tests"
+        from sourceSets.test.output
+    }
+
+    artifacts {
+        testArtifacts testJar
+    }
+}

@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':jmom-interfaces:interface-rfxcom:common')
+
+    provided libraries.dagger_compiler
+}

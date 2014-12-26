@@ -55,10 +55,9 @@ android {
 }
 
 dependencies {
-    compile project(':core:infrastructure')
-    compile project(':core:model')
-    compile project(':core:services')
+    compile project(':jmom-core:infrastructure')
+    compile project(':jmom-core:model')
+    compile project(':jmom-core:services')
     compile project(':jmom-interfaces:interface-rfxcom:droid')
-
     provided libraries.dagger_compiler
 }

@@ -1,4 +1,4 @@
-include 'core', 'core:infrastructure', 'core:model', 'core:services'
+include 'jmom-core', 'jmom-core:infrastructure', 'jmom-core:model', 'jmom-core:services'
 
 include 'jmom-interfaces'
 include 'jmom-interfaces:interface-rfxcom'
@@ -7,6 +7,6 @@ include 'jmom-interfaces:interface-rfxcom:droid'
 include 'jmom-interfaces:interface-rfxcom:server'
 
 
-include 'apps:testapp'
-include 'apps:android'
+include 'jmom-apps:testapp'
+include 'jmom-apps:android'
 

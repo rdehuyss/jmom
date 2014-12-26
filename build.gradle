@@ -39,7 +39,7 @@ subprojects {
     }
 }
 
-configure(subprojects - project(':apps:android')) {
+configure(subprojects - project(':jmom-apps:android')) {
     apply plugin: 'java'
     apply plugin: 'maven'
     apply plugin: 'me.tatarka.retrolambda'

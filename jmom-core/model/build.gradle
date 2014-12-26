@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':jmom-core:infrastructure')
+
+    testCompile project(path: ':jmom-core:infrastructure', configuration: 'testArtifacts')
+
+    provided libraries.dagger_compiler
+}

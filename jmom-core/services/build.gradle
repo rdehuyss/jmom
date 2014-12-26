@@ -1,9 +1,12 @@
 dependencies {
-    compile project(':jmom-core:infrastructure')
     compile project(':jmom-core:model')
-
-    provided libraries.dagger_compiler
+    compile ('org.dna.mqtt:moquette-broker:0.6') {
+        exclude group: 'org.apache.felix'
+    }
+    compile libraries.mqtt_client
 
     testCompile project(path: ':jmom-core:infrastructure', configuration: 'testArtifacts')
     testCompile project(path: ':jmom-core:model', configuration: 'testArtifacts')
+
+    provided libraries.dagger_compiler
 }

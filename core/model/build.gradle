@@ -1,7 +1,0 @@
-dependencies {
-    compile project(':core:infrastructure')
-
-    testCompile project(path: ':core:infrastructure', configuration: 'testArtifacts')
-
-    provided libraries.dagger_compiler
-}

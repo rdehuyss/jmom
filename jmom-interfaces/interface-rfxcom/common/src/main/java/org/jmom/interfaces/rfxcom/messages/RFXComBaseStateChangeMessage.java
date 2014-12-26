@@ -1,5 +1,6 @@
 package org.jmom.interfaces.rfxcom.messages;
 
+import org.jmom.core.model.eda.ChangeStateCommand;
 import org.jmom.core.model.things.devices.typelibrary.StateChange;
 import org.jmom.interfaces.rfxcom.messages.types.RFXComIdentifier;
 
@@ -10,4 +11,5 @@ public abstract class RFXComBaseStateChangeMessage<T extends RFXComIdentifier> e
     }
 
     public abstract StateChange getStateChange();
+
 }

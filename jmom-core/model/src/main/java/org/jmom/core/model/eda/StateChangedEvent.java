@@ -5,16 +5,16 @@ import org.jmom.core.infrastucture.eda.Event;
 import org.jmom.core.model.things.devices.DeviceIdentifier;
 import org.jmom.core.model.things.devices.typelibrary.StateChange;
 
-public class StateChangedByInterfaceEvent extends Event {
+public class StateChangedEvent extends Event {
 
     private DeviceIdentifier deviceIdentifier;
     private StateChange newState;
 
-    protected StateChangedByInterfaceEvent() {
+    protected StateChangedEvent() {
 
     }
 
-    public StateChangedByInterfaceEvent(DeviceIdentifier deviceIdentifier, StateChange newState) {
+    public StateChangedEvent(DeviceIdentifier deviceIdentifier, StateChange newState) {
         this.deviceIdentifier = deviceIdentifier;
         this.newState = newState;
     }
@@ -31,4 +31,5 @@ public class StateChangedByInterfaceEvent extends Event {
     public String toString() {
         return "DeviceIdentifier: " + getDeviceIdentifier() + "; State: " + newState;
     }
+
 }

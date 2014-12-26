@@ -1,6 +1,8 @@
 package org.jmom.interfaces.rfxcom.messages;
 
 import com.google.common.collect.Sets;
+import org.jmom.core.model.eda.ChangeStateCommand;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.core.model.things.devices.typelibrary.AbstractChange;
 import org.jmom.core.model.things.devices.typelibrary.StateChange;
 import org.jmom.interfaces.rfxcom.messages.types.PacketType;
@@ -10,7 +12,7 @@ import org.jmom.interfaces.rfxcom.messages.types.SubType;
 import java.math.BigDecimal;
 import java.util.Set;
 
-public class RFXComTemperatureMessageConverter implements RFXComMessageConverter<RFXComTemperatureMessageConverter.RFXComTemperatureMessage> {
+public class RFXComTemperatureMessageConverter implements RFXComMessageConverter {
 
     public enum RFXComTemperatureSubType implements SubType {
         UNDEF(0),
@@ -33,99 +35,34 @@ public class RFXComTemperatureMessageConverter implements RFXComMessageConverter
             this.subType = subType;
         }
 
-        RFXComTemperatureSubType(byte subType) {
-            this.subType = subType;
-        }
-
         public byte toByte() {
             return (byte) subType;
         }
     }
 
     @Override
-    public byte[] encodeMessage(RFXComTemperatureMessage rfxComTemperatureMessage) {
+    public byte[] encodeMessage(ChangeStateCommand rfxComTemperatureMessage) {
         throw new IllegalStateException("We can not control the temperature via RFXCom");
     }
 
     @Override
-    public RFXComTemperatureMessage decodeMessage(byte[] data) {
-        RFXComTemperatureIdentifier rfxComIdentifier = new RFXComTemperatureIdentifier(
+    public StateChangedEvent decodeMessage(byte[] data) {
+        RFXComIdentifier rfxComIdentifier = new RFXComIdentifier(
                 PacketType.TEMPERATURE,
                 RFXComTemperatureSubType.values()[data[2]],
                 (data[4] & 0xFF) << 8 | (data[5] & 0xFF)
         );
 
-        return new RFXComTemperatureMessage(rfxComIdentifier,
-                (short) ((data[6] & 0x7F) << 8 | (data[7] & 0xFF)) * 0.1,
-                (byte) ((data[8] & 0xF0) >> 4),
-                (byte) (data[8] & 0x0F)
+        return new StateChangedEvent(
+                rfxComIdentifier,
+                new TemperatureStateChange((short) ((data[6] & 0x7F) << 8 | (data[7] & 0xFF)) * 0.1)
         );
-    }
 
-    public static class RFXComTemperatureMessage extends RFXComBaseStateChangeMessage<RFXComTemperatureIdentifier> {
-
-        private final double temperature;
-        private final byte signalLevel;
-        private final byte batteryLevel;
-
-        public RFXComTemperatureMessage(RFXComTemperatureIdentifier identifier, double temperature, byte signalLevel, byte batteryLevel) {
-            super(identifier);
-            this.temperature = temperature;
-            this.signalLevel = signalLevel;
-            this.batteryLevel = batteryLevel;
-        }
-
-        public double getTemperature() {
-            return temperature;
-        }
-
-        public byte getSignalLevel() {
-            return signalLevel;
-        }
-
-        public byte getBatteryLevel() {
-            return batteryLevel;
-        }
-
-        @Override
-        public String toString() {
-            String str = "";
-            str += "RFXCom Message";
-            str += "\n - Packet type = " + getIdentifier().getPacketType();
-            str += "\n - Sub type = " + getIdentifier().getSubTypeAsString();
-            str += "\n - Sensor Id = " + getIdentifier().getSensorId();
-            str += "\n - Temperature = " + temperature;
-            str += "\n - Signal level = " + signalLevel;
-            str += "\n - Battery level = " + batteryLevel;
-            return str;
-        }
-
-        @Override
-        public StateChange getStateChange() {
-            return new TemperatureStateChange(temperature);
-        }
-    }
-
-    public static class RFXComTemperatureIdentifier extends RFXComIdentifier {
-
-        protected RFXComTemperatureIdentifier() {}
-
-        public RFXComTemperatureIdentifier(String identifierAsString) {
-            super(identifierAsString);
-        }
-
-        public RFXComTemperatureIdentifier(PacketType packetType, SubType subType, int sensorId) {
-            super(packetType, subType, sensorId);
-        }
-
-        public RFXComTemperatureSubType getSubType() {
-            return getSubType(RFXComTemperatureSubType.class);
-        }
-
-        public int getSensorId() {
-            return getPartAsInt(3);
-        }
-
+//        return new RFXComTemperatureMessage(rfxComIdentifier,
+//                (short) ((data[6] & 0x7F) << 8 | (data[7] & 0xFF)) * 0.1,
+//                (byte) ((data[8] & 0xF0) >> 4),
+//                (byte) (data[8] & 0x0F)
+//        );
     }
 
     public static class TemperatureStateChange implements StateChange {

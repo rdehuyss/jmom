@@ -1,9 +1,9 @@
 package org.jmom.interfaces.rfxcom;
 
+import org.jmom.core.model.eda.ChangeStateCommand;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.interfaces.rfxcom.connector.RFXComConnector;
 import org.jmom.interfaces.rfxcom.connector.RFXComEventListener;
-import org.jmom.interfaces.rfxcom.messages.RFXComBaseMessage;
-import org.jmom.interfaces.rfxcom.messages.RFXComBaseStateChangeMessage;
 import org.jmom.interfaces.rfxcom.messages.RFXComMessageConverter;
 import org.jmom.interfaces.rfxcom.messages.RFXComMessageFactory;
 import org.slf4j.Logger;
@@ -67,10 +67,10 @@ public class RFXComConnection {
         rfxComConnector.disconnect();
     }
 
-    public void sendCommand(RFXComBaseStateChangeMessage stateChangeMessage) {
+    public void sendCommand(ChangeStateCommand command) {
         try {
-            RFXComMessageConverter converter = RFXComMessageFactory.getConverter(stateChangeMessage);
-            byte[] commandAsBytes = converter.encodeMessage(stateChangeMessage);
+            RFXComMessageConverter converter = RFXComMessageFactory.getConverter(command);
+            byte[] commandAsBytes = converter.encodeMessage(command);
             rfxComConnector.sendMessage(commandAsBytes);
         } catch (IOException e) {
             e.printStackTrace();
@@ -83,10 +83,10 @@ public class RFXComConnection {
         public void packetReceived(EventObject event, byte[] data) {
             RFXComMessageConverter converter = RFXComMessageFactory.getConverter(data);
             if (converter != null) {
-                RFXComBaseMessage<?> message = converter.decodeMessage(data);
+                StateChangedEvent message = converter.decodeMessage(data);
                 System.out.println("Data received:\n" + message);
                 if (rfxComMessageEventListener != null) {
-                    rfxComMessageEventListener.messageReceived(message);
+                    rfxComMessageEventListener.onStateChangedEvent(message);
                 }
             } else {
                 System.out.println("Data received:\n" + DatatypeConverter.printHexBinary(data));

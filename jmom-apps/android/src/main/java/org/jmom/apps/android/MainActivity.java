@@ -8,53 +8,46 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import com.google.common.collect.JMomFluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import dagger.ObjectGraph;
 import org.jmom.core.infrastucture.bus.JMomBusRegistrar;
+import org.jmom.core.model.eda.ChangeStateCommand;
+import org.jmom.core.model.things.devices.DeviceIdentifier;
+import org.jmom.core.model.things.devices.typelibrary.OnOffChange;
 
 
 public class MainActivity extends Activity {
+
+    private TestClass testClass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
-        }
+
 
         ObjectGraph objectGraph = ObjectGraph.create(new AndroidModule());
         JMomBusRegistrar registrar = objectGraph.get(JMomBusRegistrar.class);
         registrar.doRegistration();
 
-        TestClass testClass = objectGraph.get(TestClass.class);
+        testClass = objectGraph.get(TestClass.class);
         testClass.setMainActivity(this);
         Toast.makeText(this, "Successfully intialized!", Toast.LENGTH_LONG).show();
+        ButterKnife.inject(this);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
+    @OnClick(R.id.btn_kerstlamp)
+    public void setOn(Button button) {
+        if("Off".equals(button.getText())) {
+            testClass.doStateChange(new ChangeStateCommand(new DeviceIdentifier("RFXCom-LIGHTING1-ARC-L-5"), OnOffChange.OFF));
+            button.setText("On");
+        } else {
+            testClass.doStateChange(new ChangeStateCommand(new DeviceIdentifier("RFXCom-LIGHTING1-ARC-L-5"), OnOffChange.ON));
+            button.setText("Off");
         }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            StringBuilder result = new StringBuilder();
-
-            JMomFluentIterable.from(Lists.newArrayList("1 ", "2 ", "3 ")).forEachItem(s -> result.append(s));
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            final Button button = (Button) rootView.findViewById(R.id.test_btn);
-
-            button.setOnClickListener(v -> Toast.makeText(v.getContext(), "Text to show: " + result.toString(), Toast.LENGTH_LONG).show());
-            return rootView;
-        }
-
     }
 }

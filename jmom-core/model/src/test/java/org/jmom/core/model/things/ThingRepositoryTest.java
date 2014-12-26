@@ -6,11 +6,11 @@ import com.google.common.collect.ImmutableList;
 import org.jmom.core.infrastucture.cqrs.Repo;
 import org.jmom.core.infrastucture.serialization.JMomObjectMapper;
 import org.jmom.core.model.eda.SaveThingCommand;
-import org.jmom.core.model.eda.StateChangedByInterfaceEvent;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.core.model.things.ThingRepository.UpdateOrSaveThingDomainEvent;
 import org.jmom.core.model.things.ThingRepository.UpdateStateChangeDomainEvent;
 import org.jmom.core.model.things.devices.Device;
-import org.jmom.core.model.things.devices.DeviceIdentifierImpl;
+import org.jmom.core.model.things.devices.DeviceIdentifier;
 import org.jmom.core.model.things.devices.Light;
 import org.jmom.core.model.things.devices.typelibrary.OnOffChange;
 import org.junit.Before;
@@ -53,7 +53,7 @@ public class ThingRepositoryTest {
         keuken = new Location("Keuken");
         eetkamer = new Location("Eetkamer");
         spots = new Light("Spots")
-                .addIdentifier(new DeviceIdentifierImpl("id-1"))
+                .addIdentifier(new DeviceIdentifier("id-1"))
                 .setState(OnOffChange.ON);
 
         repo = Mockito.mock(Repo.class);
@@ -96,7 +96,7 @@ public class ThingRepositoryTest {
         assertThat(actualSpots).isEqualTo(spots);
         ImmutableList<Thing> actualLocations = this.house.descendantsOrSelf().filter(instanceOf(Location.class)).toList();
         assertThat(actualLocations).hasSize(6);
-        Thing device = this.house.descendantsOrSelf().filter(Device.class).firstMatch(hasDeviceIdentifier(new DeviceIdentifierImpl("id-1"))).get();
+        Thing device = this.house.descendantsOrSelf().filter(Device.class).firstMatch(hasDeviceIdentifier(new DeviceIdentifier("id-1"))).get();
         assertThat(device).isEqualTo(spots);
     }
 
@@ -118,8 +118,8 @@ public class ThingRepositoryTest {
     @Test
     public void changeState() {
         assertThat(spots.getState()).isEqualTo(OnOffChange.ON);
-        DeviceIdentifierImpl deviceIdentifier = new DeviceIdentifierImpl("id-1");
-        StateChangedByInterfaceEvent stateChangedEvent = new StateChangedByInterfaceEvent(deviceIdentifier, OnOffChange.OFF);
+        DeviceIdentifier deviceIdentifier = new DeviceIdentifier("id-1");
+        StateChangedEvent stateChangedEvent = new StateChangedEvent(deviceIdentifier, OnOffChange.OFF);
         thingRepository.apply(new UpdateStateChangeDomainEvent(stateChangedEvent));
         assertThat(spots.getState()).isEqualTo(OnOffChange.OFF);
     }
@@ -127,8 +127,8 @@ public class ThingRepositoryTest {
     @Test
     public void changeStateDoesNotChangeVersion() {
         assertThat(thingRepository.getUncommittedChanges()).hasSize(7);
-        DeviceIdentifierImpl deviceIdentifier = new DeviceIdentifierImpl("id-1");
-        StateChangedByInterfaceEvent stateChangedEvent = new StateChangedByInterfaceEvent(deviceIdentifier, OnOffChange.OFF);
+        DeviceIdentifier deviceIdentifier = new DeviceIdentifier("id-1");
+        StateChangedEvent stateChangedEvent = new StateChangedEvent(deviceIdentifier, OnOffChange.OFF);
         thingRepository.applyInMemoryOnly(new UpdateStateChangeDomainEvent(stateChangedEvent));
         assertThat(thingRepository.getUncommittedChanges()).hasSize(7);
     }

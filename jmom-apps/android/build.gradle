@@ -12,6 +12,18 @@ buildscript {
     }
 }
 
+
+dependencies {
+    compile 'com.jakewharton:butterknife:6.0.0'
+
+    compile project(':jmom-core:infrastructure')
+    compile project(':jmom-core:model')
+    compile project(':jmom-core:services')
+    compile project(':jmom-interfaces:interface-rfxcom:droid')
+
+    provided libraries.dagger_compiler
+}
+
 android {
     compileSdkVersion 21
     buildToolsVersion "21.0.0"
@@ -47,6 +59,7 @@ android {
         exclude 'META-INF/license.txt'
         exclude 'META-INF/dependencies.txt'
         exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/services/com.fasterxml.jackson.core.JsonFactory'
     }
 
     lintOptions {
@@ -54,10 +67,3 @@ android {
     }
 }
 
-dependencies {
-    compile project(':jmom-core:infrastructure')
-    compile project(':jmom-core:model')
-    compile project(':jmom-core:services')
-    compile project(':jmom-interfaces:interface-rfxcom:droid')
-    provided libraries.dagger_compiler
-}

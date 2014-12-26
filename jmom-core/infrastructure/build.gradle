@@ -2,7 +2,7 @@ dependencies {
     compile libraries.dagger
     compile libraries.guava
     compile libraries.jackson
-    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.4.4'
+    compile libraries.jackson_smile
     compile libraries.joda_time
     compile libraries.slf_api
 

@@ -1,6 +1,9 @@
 package org.jmom.interfaces.rfxcom.messages;
 
-public interface RFXComMessageConverter<T extends  RFXComBaseMessage> {
+import org.jmom.core.model.eda.ChangeStateCommand;
+import org.jmom.core.model.eda.StateChangedEvent;
+
+public interface RFXComMessageConverter {
 
     /**
      * Procedure for encode raw data.
@@ -8,14 +11,14 @@ public interface RFXComMessageConverter<T extends  RFXComBaseMessage> {
      * @param data
      *            Raw data.
      */
-    T decodeMessage(byte[] data);
+    StateChangedEvent decodeMessage(byte[] data);
 
     /**
      * Procedure for decode object to raw data.
      *
      * @return raw data.
      */
-    byte[] encodeMessage(T message);
+    byte[] encodeMessage(ChangeStateCommand message);
 
 
 }

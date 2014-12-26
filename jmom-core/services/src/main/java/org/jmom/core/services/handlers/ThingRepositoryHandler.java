@@ -2,7 +2,7 @@ package org.jmom.core.services.handlers;
 
 import com.google.common.eventbus.Subscribe;
 import org.jmom.core.model.eda.SaveThingCommand;
-import org.jmom.core.model.eda.StateChangedByInterfaceEvent;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.core.infrastucture.cqrs.Repo;
 import org.jmom.core.model.things.ThingRepository;
 import org.jmom.core.model.things.ThingRepository.UpdateOrSaveThingDomainEvent;
@@ -27,7 +27,7 @@ public class ThingRepositoryHandler implements Handler {
     }
 
     @Subscribe
-    public void handle(StateChangedByInterfaceEvent stateChangedEvent) {
+    public void handle(StateChangedEvent stateChangedEvent) {
         thingRepository.applyInMemoryOnly(new UpdateStateChangeDomainEvent(stateChangedEvent));
     }
 }

@@ -6,8 +6,12 @@ import org.jmom.core.model.things.devices.typelibrary.CommandChange;
 
 public class ChangeStateCommand extends Command {
 
-    private final DeviceIdentifier deviceIdentifier;
-    private final CommandChange commandType;
+    private DeviceIdentifier deviceIdentifier;
+    private CommandChange commandType;
+
+    protected ChangeStateCommand() {
+
+    }
 
     public ChangeStateCommand(DeviceIdentifier identifier, CommandChange commandType) {
         deviceIdentifier = identifier;

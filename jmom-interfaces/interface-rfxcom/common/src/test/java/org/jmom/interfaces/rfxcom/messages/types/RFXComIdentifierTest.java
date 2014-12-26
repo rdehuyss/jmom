@@ -25,7 +25,7 @@ public class RFXComIdentifierTest {
         assertThat(result.getPacketType()).isEqualTo(PacketType.LIGHTING1);
         assertThat(result.getSubType(RFXComLighting1SubType.class)).isEqualTo(X10);
         assertThat(result.getPartAsChar(3)).isEqualTo('A');
-        assertThat(result.getPartAsByte(4)).isEqualTo((byte) 3);
+        assertThat(result.getCharPartAsByte(4)).isEqualTo((byte) 3);
     }
 
     @Test

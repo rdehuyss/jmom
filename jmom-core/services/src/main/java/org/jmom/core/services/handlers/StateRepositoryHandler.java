@@ -1,7 +1,7 @@
 package org.jmom.core.services.handlers;
 
 import com.google.common.eventbus.Subscribe;
-import org.jmom.core.model.eda.StateChangedByInterfaceEvent;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.core.infrastucture.cqrs.Repo;
 import org.jmom.core.model.things.StateRepository;
 import org.jmom.core.model.things.StateRepository.UpdateStateChangeDomainEvent;
@@ -19,7 +19,7 @@ public class StateRepositoryHandler implements Handler {
     }
 
     @Subscribe
-    public void handle(StateChangedByInterfaceEvent stateChangedEvent) throws IOException {
+    public void handle(StateChangedEvent stateChangedEvent) throws IOException {
         stateRepository.apply(new UpdateStateChangeDomainEvent(stateChangedEvent));
         repo.save(stateRepository);
     }

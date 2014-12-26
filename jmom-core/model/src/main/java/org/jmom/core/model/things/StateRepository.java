@@ -1,7 +1,7 @@
 package org.jmom.core.model.things;
 
 
-import org.jmom.core.model.eda.StateChangedByInterfaceEvent;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.core.model.things.devices.DeviceIdentifier;
 import org.jmom.core.infrastucture.cqrs.AggregateRoot;
 import org.jmom.core.infrastucture.cqrs.DomainEvent;
@@ -12,7 +12,7 @@ import static com.google.common.collect.Maps.newHashMap;
 
 public class StateRepository extends AggregateRoot {
 
-    private Map<String, StateChangedByInterfaceEvent> stateChanges;
+    private Map<String, StateChangedEvent> stateChanges;
 
     public StateRepository() {
         stateChanges = newHashMap();
@@ -25,9 +25,9 @@ public class StateRepository extends AggregateRoot {
     public static class UpdateStateChangeDomainEvent implements DomainEvent<StateRepository> {
 
         private final DeviceIdentifier deviceIdentifier;
-        private final StateChangedByInterfaceEvent stateChangedEvent;
+        private final StateChangedEvent stateChangedEvent;
 
-        public UpdateStateChangeDomainEvent(StateChangedByInterfaceEvent stateChangedEvent) {
+        public UpdateStateChangeDomainEvent(StateChangedEvent stateChangedEvent) {
             this.deviceIdentifier = stateChangedEvent.getDeviceIdentifier();
             this.stateChangedEvent = stateChangedEvent;
         }

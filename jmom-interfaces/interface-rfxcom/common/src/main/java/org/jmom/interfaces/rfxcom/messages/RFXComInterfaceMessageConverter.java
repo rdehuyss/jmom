@@ -1,6 +1,8 @@
 package org.jmom.interfaces.rfxcom.messages;
 
 import com.google.common.collect.Sets;
+import org.jmom.core.model.eda.ChangeStateCommand;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.core.model.things.devices.typelibrary.AbstractChange;
 import org.jmom.interfaces.rfxcom.messages.types.PacketType;
 import org.jmom.interfaces.rfxcom.messages.types.RFXComIdentifier;
@@ -8,7 +10,7 @@ import org.jmom.interfaces.rfxcom.messages.types.SubType;
 
 import java.util.Set;
 
-public class RFXComInterfaceMessageConverter implements RFXComMessageConverter<RFXComInterfaceMessageConverter.RFXComInterfaceMessage>{
+public class RFXComInterfaceMessageConverter implements RFXComMessageConverter {
 
     public enum RFXComInterfaceSubType implements SubType {
         INTERFACE_RESPONSE(0),
@@ -90,7 +92,7 @@ public class RFXComInterfaceMessageConverter implements RFXComMessageConverter<R
     }
 
     @Override
-    public RFXComInterfaceMessage decodeMessage(byte[] data) {
+    public StateChangedEvent decodeMessage(byte[] data) {
         RFXComInterfaceIdentifier rfxComIdentifier = new RFXComInterfaceIdentifier(
                 PacketType.INTERFACE_MESSAGE,
                 RFXComInterfaceSubType.values()[data[2]]);
@@ -99,11 +101,11 @@ public class RFXComInterfaceMessageConverter implements RFXComMessageConverter<R
     }
 
     @Override
-    public byte[] encodeMessage(RFXComInterfaceMessage message) {
+    public byte[] encodeMessage(ChangeStateCommand message) {
         return new byte[0];
     }
 
-    public static class RFXComInterfaceMessage extends RFXComBaseMessage<RFXComInterfaceIdentifier> {
+    public static class RFXComInterfaceMessage extends StateChangedEvent {
 
         private TransceiverType transceiverType = TransceiverType._443_92MHZ_TRANSCEIVER;
         private Commands command = Commands.UNKNOWN;
@@ -140,7 +142,7 @@ public class RFXComInterfaceMessageConverter implements RFXComMessageConverter<R
         private byte hardwareVersion2  = 0;
 
         protected RFXComInterfaceMessage(RFXComInterfaceIdentifier identifier, byte[] data) {
-            super(identifier);
+            super(identifier, null);
             try {
                 command = Commands.values()[data[4]];
             } catch (Exception e) {
@@ -194,8 +196,8 @@ public class RFXComInterfaceMessageConverter implements RFXComMessageConverter<R
         public String toString() {
             String str = "";
             str += "RFXCom Message";
-            str += "\n - Packet type = " + getIdentifier().getPacketType();
-            str += "\n - Sub type = " + getIdentifier().getSubType();
+            str += "\n - Packet type = " + ((RFXComInterfaceIdentifier)getDeviceIdentifier()).getPacketType();
+            str += "\n - Sub type = " + ((RFXComInterfaceIdentifier)getDeviceIdentifier()).getSubType();
             str += "\n - Command = " + command;
             str += "\n - Transceiver type = " + transceiverType;
             str += "\n - Firmware version = " + firmwareVersion;
@@ -232,10 +234,6 @@ public class RFXComInterfaceMessageConverter implements RFXComMessageConverter<R
     }
 
     public static class RFXComInterfaceIdentifier extends RFXComIdentifier {
-
-        public RFXComInterfaceIdentifier(String identifierAsString) {
-            super(identifierAsString);
-        }
 
         public RFXComInterfaceIdentifier(PacketType packetType, SubType subType) {
             super(packetType, subType);

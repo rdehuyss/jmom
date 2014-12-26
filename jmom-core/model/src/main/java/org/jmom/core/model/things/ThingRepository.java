@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import org.jmom.core.infrastucture.cqrs.AggregateRoot;
 import org.jmom.core.infrastucture.cqrs.DomainEvent;
 import org.jmom.core.model.eda.SaveThingCommand;
-import org.jmom.core.model.eda.StateChangedByInterfaceEvent;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.core.model.things.devices.Device;
 import org.jmom.core.model.things.devices.DeviceIdentifier;
 import org.jmom.core.model.things.devices.typelibrary.StateChange;
@@ -90,7 +90,7 @@ public class ThingRepository extends AggregateRoot {
         private final DeviceIdentifier deviceIdentifier;
         private final StateChange stateChange;
 
-        public UpdateStateChangeDomainEvent(StateChangedByInterfaceEvent stateChangedEvent) {
+        public UpdateStateChangeDomainEvent(StateChangedEvent stateChangedEvent) {
             deviceIdentifier = stateChangedEvent.getDeviceIdentifier();
             stateChange = stateChangedEvent.getNewState();
         }

@@ -1,7 +1,9 @@
 package org.jmom.interfaces.rfxcom.messages;
 
+import org.jmom.core.model.eda.ChangeStateCommand;
 import org.jmom.interfaces.rfxcom.RFXComException;
 import org.jmom.interfaces.rfxcom.messages.types.PacketType;
+import org.jmom.interfaces.rfxcom.messages.types.RFXComIdentifier;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,8 +57,8 @@ public class RFXComMessageFactory {
         return getConverter(packetType);
     }
 
-    public static RFXComMessageConverter getConverter(RFXComBaseMessage message) {
-        return getConverter(message.getIdentifier().getPacketType());
+    public static RFXComMessageConverter getConverter(ChangeStateCommand command) {
+        return getConverter(new RFXComIdentifier(command.getDeviceIdentifier()).getPacketType());
     }
 
     private static RFXComMessageConverter getConverter(PacketType packetType) {

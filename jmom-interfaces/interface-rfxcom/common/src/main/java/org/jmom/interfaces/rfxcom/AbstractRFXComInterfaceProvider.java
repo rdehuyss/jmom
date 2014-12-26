@@ -2,19 +2,17 @@ package org.jmom.interfaces.rfxcom;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.AbstractService;
+import org.jmom.core.infrastucture.bus.JMomBusAware;
 import org.jmom.core.infrastucture.bus.JMomEventBus;
 import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.core.model.eda.StateChangedByInterfaceEvent;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.core.model.interfacing.InterfaceProvider;
-import org.jmom.core.model.things.devices.typelibrary.AbstractChange;
-import org.jmom.core.model.things.devices.typelibrary.StateChange;
+import org.jmom.interfaces.rfxcom.connector.RFXComConnector;
 import org.jmom.interfaces.rfxcom.messages.RFXComBaseMessage;
 import org.jmom.interfaces.rfxcom.messages.RFXComBaseStateChangeMessage;
-import org.jmom.interfaces.rfxcom.messages.types.RFXComIdentifier;
+import org.jmom.interfaces.rfxcom.messages.RFXComLighting1MessageConverter;
 
-import java.util.Set;
-
-public abstract class AbstractRFXComInterfaceProvider extends AbstractService implements InterfaceProvider, RFXComMessageEventListener {
+public abstract class AbstractRFXComInterfaceProvider extends AbstractService implements InterfaceProvider, RFXComMessageEventListener, JMomBusAware {
 
     public static final String NAME = "RFXCom";
     private RFXComConnection rfxComConnection;
@@ -29,14 +27,28 @@ public abstract class AbstractRFXComInterfaceProvider extends AbstractService im
         return NAME;
     }
 
-    @Override
-    public void messageReceived(RFXComBaseMessage<?> message) {
-        if (message instanceof RFXComBaseStateChangeMessage) {
-            RFXComBaseStateChangeMessage stateChangeMessage = (RFXComBaseStateChangeMessage) message;
-            StateChangedByInterfaceEvent stateChangedEvent = new StateChangedByInterfaceEvent(message.getIdentifier(), stateChangeMessage.getStateChange());
+    protected void initConnection(RFXComConnector connector) throws Exception {
+        rfxComConnection = new RFXComConnection(connector);
+        rfxComConnection.setRfxComMessageEventListener(this);
+        rfxComConnection.connect();
+    }
 
-            eventBus.post(stateChangedEvent);
+    @Override
+    protected void doStop() {
+        rfxComConnection.disconnect();
+        notifyStopped();
+    }
+
+    @Override
+    public void onStateChangedEvent(StateChangedEvent message) {
+        if(message.getNewState() != null) {
+            eventBus.post(message);
         }
+    }
+
+    @Subscribe
+    public void onChangeStateCommand(ChangeStateCommand command) {
+        rfxComConnection.sendCommand(command);
     }
 
 }

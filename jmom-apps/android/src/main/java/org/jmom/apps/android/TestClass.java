@@ -4,7 +4,9 @@ import android.widget.Toast;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ServiceManager;
 import org.jmom.core.infrastucture.bus.JMomBusRegistrar;
-import org.jmom.core.model.eda.StateChangedByInterfaceEvent;
+import org.jmom.core.infrastucture.bus.JMomCommandBus;
+import org.jmom.core.model.eda.ChangeStateCommand;
+import org.jmom.core.model.eda.StateChangedEvent;
 import org.jmom.core.model.things.StateRepository;
 import org.jmom.core.model.things.ThingRepository;
 
@@ -18,15 +20,17 @@ public class TestClass {
     private final ThingRepository thingRepository;
     private final StateRepository stateRepository;
     private final JMomBusRegistrar jMomBusRegistrar;
+    private final JMomCommandBus commandBus;
     private final ServiceManager serviceManager;
 
     private MainActivity mainActivity;
 
     @Inject
-    public TestClass(ThingRepository thingRepository, StateRepository stateRepository, JMomBusRegistrar jMomBusRegistrar, ServiceManager serviceManager) {
+    public TestClass(ThingRepository thingRepository, StateRepository stateRepository, JMomBusRegistrar jMomBusRegistrar, JMomCommandBus commandBus, ServiceManager serviceManager) {
         this.thingRepository = thingRepository;
         this.stateRepository = stateRepository;
         this.jMomBusRegistrar = jMomBusRegistrar;
+        this.commandBus = commandBus;
         this.serviceManager = serviceManager;
 
         jMomBusRegistrar.register(this);
@@ -37,7 +41,7 @@ public class TestClass {
 
 
     @Subscribe
-    public void stateChanged(StateChangedByInterfaceEvent stateChangedEvent) {
+    public void stateChanged(StateChangedEvent stateChangedEvent) {
         if(mainActivity != null) {
             mainActivity.runOnUiThread(new Runnable() {
                 public void run() {
@@ -50,5 +54,9 @@ public class TestClass {
 
     public void setMainActivity(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
+    }
+
+    public void doStateChange(ChangeStateCommand command) {
+        commandBus.post(command);
     }
 }

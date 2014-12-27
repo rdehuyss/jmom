@@ -10,10 +10,12 @@ import android.widget.Button;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.google.android.gms.location.Geofence;
 import com.google.common.collect.JMomFluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import dagger.ObjectGraph;
+import org.jmom.apps.android.geofencing.GeofencingRegisterer;
 import org.jmom.core.infrastucture.bus.JMomBusRegistrar;
 import org.jmom.core.model.eda.ChangeStateCommand;
 import org.jmom.core.model.things.devices.DeviceIdentifier;
@@ -23,6 +25,7 @@ import org.jmom.core.model.things.devices.typelibrary.OnOffChange;
 public class MainActivity extends Activity {
 
     private TestClass testClass;
+    //50.802886, 4.956238
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +41,15 @@ public class MainActivity extends Activity {
         testClass.setMainActivity(this);
         Toast.makeText(this, "Successfully intialized!", Toast.LENGTH_LONG).show();
         ButterKnife.inject(this);
+
+        new GeofencingRegisterer(this)
+                .registerGeofences(Lists.newArrayList(new Geofence.Builder()
+                                .setRequestId("Ronald")
+                                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                                .setCircularRegion(50.802886, 4.956238, 50)
+                                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                                .build()
+                ));
     }
 
     @OnClick(R.id.btn_kerstlamp)

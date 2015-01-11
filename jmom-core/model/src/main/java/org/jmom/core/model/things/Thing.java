@@ -17,18 +17,28 @@ public abstract class Thing<T extends Thing> {
     @JsonBackReference
     ThingTree<?> parent;
     private String name;
+    private String description;
     private Map<String, Object> attributes;
 
     protected Thing() {
     }
 
     public Thing(String name) {
+        this(name, null);
+    }
+
+    public Thing(String name, String description) {
         this.name = name;
+        this.description = description;
         this.attributes = new HashMap<>();
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public boolean isRoot() {
@@ -45,6 +55,10 @@ public abstract class Thing<T extends Thing> {
         } else {
             return parent.getLevel() + 1;
         }
+    }
+
+    public ThingTree<?> getParent() {
+        return parent;
     }
 
     public Path getPath() {
@@ -81,6 +95,7 @@ public abstract class Thing<T extends Thing> {
 
     protected void updateWith(Thing otherThing) {
         this.name = otherThing.name;
+        this.description = otherThing.description;
         this.attributes.putAll(otherThing.attributes);
     }
 

@@ -1,49 +1,31 @@
 package org.jmom.core.infrastucture;
 
-import com.google.common.collect.Sets;
-import dagger.Module;
-import dagger.Provides;
+import org.jmom.core.infrastucture.bus.JMomBus;
 import org.jmom.core.infrastucture.bus.JMomBusAware;
-import org.jmom.core.infrastucture.bus.JMomBusRegistrar;
-import org.jmom.core.infrastucture.bus.JMomCommandBus;
-import org.jmom.core.infrastucture.bus.JMomEventBus;
+import org.jmom.core.infrastucture.bus.JMomBusInterceptor;
 import org.jmom.core.infrastucture.serialization.JMomObjectMapper;
 
-import javax.inject.Singleton;
-import java.util.Set;
+import static org.jmom.core.infrastucture.DIGraph.DIRuleBuilder.aDIRule;
+import static org.jmom.core.infrastucture.DIGraph.aDIGraph;
 
-@Module(
-        library = true,
-        complete = false
-)
 public class JMomInfrastructureModule {
 
-    @Provides
-    @Singleton
-    public JMomObjectMapper provideObjectMapper() {
-        return new JMomObjectMapper();
-    }
+    public static class Init {
 
-    @Provides
-    @Singleton
-    public JMomCommandBus commandBus() {
-        return new JMomCommandBus();
-    }
+        private static DIGraph diGraph;
 
-    @Provides
-    @Singleton
-    public JMomEventBus eventBus() {
-        return new JMomEventBus();
-    }
+        public static DIGraph diGraph() {
+            if(diGraph == null) {
+                diGraph = aDIGraph()
+                        .withRule(aDIRule().dependsOn(JMomBus.class).objectAssignableFrom(JMomBusAware.class).onPostConstruct((obj, diGraph) -> diGraph.getBean(JMomBus.class).register(obj)))
+                        .withRule(aDIRule().dependsOn(JMomBus.class).objectAssignableFrom(JMomBusInterceptor.class).onPostConstruct((obj, diGraph) -> diGraph.getBean(JMomBus.class).registerInterceptor((JMomBusInterceptor) obj)))
+                        .withDestructionRule(aDIRule().dependsOn(JMomBus.class).objectAssignableFrom(JMomBusAware.class).onPostConstruct((obj, diGraph) -> diGraph.getBean(JMomBus.class).unregister(obj)))
+                        .withDestructionRule(aDIRule().dependsOn(JMomBus.class).objectAssignableFrom(JMomBusInterceptor.class).onPostConstruct((obj, diGraph) -> diGraph.getBean(JMomBus.class).unregisterInterceptor((JMomBusInterceptor) obj)))
+                        .register(new JMomObjectMapper())
+                        .register(new JMomBus());
+            }
+            return diGraph;
+        }
 
-    @Provides(type = Provides.Type.SET_VALUES)
-    public Set<JMomBusAware> provideOverriddenJMomBusAware() {
-        return Sets.newHashSet();
-    }
-
-    @Provides
-    @Singleton
-    public JMomBusRegistrar provideJMomBusRegistrar(JMomCommandBus commandBus, JMomEventBus eventBus, Set<JMomBusAware> handlers) {
-        return new JMomBusRegistrar(commandBus, eventBus, handlers);
     }
 }

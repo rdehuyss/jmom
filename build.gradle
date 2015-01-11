@@ -1,14 +1,13 @@
 ext.libraries = [
-        dagger          : 'com.squareup.dagger:dagger:1.2.2',
-        dagger_compiler : 'com.squareup.dagger:dagger-compiler:1.2.2',
-        joda_time 	    : 'joda-time:joda-time:2.3',
-        guava     	    : 'com.google.guava:guava:18.0',
-        jackson         : 'com.fasterxml.jackson.core:jackson-databind:2.4.4',
-        jackson_smile   : 'com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.4.4',
-        slf_api   	    : 'org.slf4j:slf4j-api:1.7.7',
-        slf_simple	    : 'org.slf4j:slf4j-simple:1.7.7',
-        mqtt_server     : 'org.dna.mqtt:moquette-broker:0.6',
-	    mqtt_client     : 'org.eclipse.paho:mqtt-client:0.4.0',
+        joda_time 	      : 'joda-time:joda-time:2.3',
+        guava     	      : 'com.google.guava:guava:18.0',
+        jackson           : 'com.fasterxml.jackson.core:jackson-databind:2.4.4',
+        jackson_guava     : 'com.fasterxml.jackson.datatype:jackson-datatype-guava:2.4.4',
+        jackson_smile     : 'com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.4.4',
+        slf_api   	      : 'org.slf4j:slf4j-api:1.7.7',
+        slf_simple	      : 'org.slf4j:slf4j-simple:1.7.7',
+        mqtt_server       : 'org.dna.mqtt:moquette-broker:0.6',
+	    mqtt_client       : 'org.eclipse.paho:mqtt-client:0.4.0',
 ]
 
 buildscript {

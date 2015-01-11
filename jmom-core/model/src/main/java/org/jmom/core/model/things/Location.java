@@ -7,4 +7,8 @@ public class Location extends ThingTree<Location> {
     public Location(String name) {
         super(name);
     }
+
+    public Location(String name, String description) {
+        super(name, description);
+    }
 }

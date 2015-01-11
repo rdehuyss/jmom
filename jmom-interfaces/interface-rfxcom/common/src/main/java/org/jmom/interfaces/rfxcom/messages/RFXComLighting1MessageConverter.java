@@ -1,8 +1,7 @@
 package org.jmom.interfaces.rfxcom.messages;
 
-import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.core.model.eda.StateChangedEvent;
-import org.jmom.core.model.things.devices.DeviceIdentifier;
+import org.jmom.core.model.eda.commands.ChangeStateCommand;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 import org.jmom.core.model.things.devices.typelibrary.CommandChange;
 import org.jmom.core.model.things.devices.typelibrary.OnOffChange;
 import org.jmom.core.model.things.devices.typelibrary.StateChange;

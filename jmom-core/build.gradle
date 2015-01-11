@@ -1,5 +1,4 @@
 subprojects {
     dependencies {
-        provided libraries.dagger_compiler
     }
 }

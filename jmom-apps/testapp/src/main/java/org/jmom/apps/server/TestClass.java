@@ -2,46 +2,44 @@ package org.jmom.apps.server;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ServiceManager;
-import dagger.ObjectGraph;
-import org.jmom.core.infrastucture.bus.JMomBusRegistrar;
-import org.jmom.core.infrastucture.bus.JMomCommandBus;
-import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.core.model.eda.StateChangedEvent;
+import org.jmom.core.infrastucture.bus.JMomBus;
+import org.jmom.core.model.configuration.ConfigurationRepository;
+import org.jmom.core.model.controlunit.CentralControlUnit;
+import org.jmom.core.model.controlunit.ControlUnitRepository;
+import org.jmom.core.model.eda.commands.ChangeStateCommand;
+import org.jmom.core.model.eda.commands.CreateControlUnitCommand;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 import org.jmom.core.model.things.StateRepository;
 import org.jmom.core.model.things.ThingRepository;
-import org.jmom.core.model.things.devices.DeviceIdentifier;
-import org.jmom.core.model.things.devices.typelibrary.OnOffChange;
 
-import javax.inject.Inject;
 import java.io.IOException;
 
 public class TestClass {
 
+    private ControlUnitRepository controlUnitRepository;
+    private ConfigurationRepository configurationRepository;
     private ThingRepository thingRepository;
     private StateRepository stateRepository;
-    private JMomCommandBus commandBus;
-    private JMomBusRegistrar jMomBusRegistrar;
+    private JMomBus jMomBus;
     private ServiceManager serviceManager;
 
     public static void main(String[] args) throws IOException {
-        ObjectGraph objectGraph = ObjectGraph.create(new ServerModule());
-        JMomBusRegistrar registrar = objectGraph.get(JMomBusRegistrar.class);
-        registrar.doRegistration();
-
-        TestClass testClass = objectGraph.get(TestClass.class);
         System.out.println("Testclass found!");
-        testClass.doStateChange(new ChangeStateCommand(new DeviceIdentifier("RFXCom-LIGHTING1-ARC-L-5"), OnOffChange.ON));
+//        testClass.doStateChange(new ChangeStateCommand(new DeviceIdentifier("RFXCom-LIGHTING1-ARC-L-5"), OnOffChange.ON));
     }
 
-    @Inject
-    public TestClass(ThingRepository thingRepository, StateRepository stateRepository, JMomCommandBus commandBus, JMomBusRegistrar jMomBusRegistrar, ServiceManager serviceManager) {
+    public TestClass(ControlUnitRepository controlUnitRepository, ConfigurationRepository configurationRepository, ThingRepository thingRepository, StateRepository stateRepository, JMomBus jMomBus, ServiceManager serviceManager) {
+        this.controlUnitRepository = controlUnitRepository;
+        this.configurationRepository = configurationRepository;
         this.thingRepository = thingRepository;
         this.stateRepository = stateRepository;
-        this.commandBus = commandBus;
-        this.jMomBusRegistrar = jMomBusRegistrar;
+        this.jMomBus = jMomBus;
         this.serviceManager = serviceManager;
 
-        jMomBusRegistrar.register(this);
+
+        if (!controlUnitRepository.isControlUnitConfigured()) {
+            jMomBus.post(new CreateControlUnitCommand(new CentralControlUnit("ronald.dehuysser@gmail.com", "testen", "Central Control Unit")));
+        }
 
         serviceManager.startAsync();
         serviceManager.awaitHealthy();
@@ -55,7 +53,7 @@ public class TestClass {
     }
 
     public void doStateChange(ChangeStateCommand command) {
-        commandBus.post(command);
+        jMomBus.post(command);
     }
 
 }

@@ -1,7 +1,7 @@
 package org.jmom.interfaces.rfxcom.messages;
 
-import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.core.model.eda.StateChangedEvent;
+import org.jmom.core.model.eda.commands.ChangeStateCommand;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 
 public interface RFXComMessageConverter {
 

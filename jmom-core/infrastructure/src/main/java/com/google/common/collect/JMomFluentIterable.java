@@ -130,11 +130,12 @@ public abstract class JMomFluentIterable<E> implements Iterable<E> {
         return from(Lists.newArrayList(elements));
     }
 
-    public void forEachItem(Consumer<? super E> action) {
+    public JMomFluentIterable<E> forEachItem(Consumer<? super E> action) {
         Objects.requireNonNull(action);
         for (E t : this) {
             action.accept(t);
         }
+        return this;
     }
 
     /**

@@ -1,5 +1,7 @@
 package org.jmom.core.model.things;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Splitter;
 
 import java.util.Iterator;
@@ -8,7 +10,7 @@ import java.util.Objects;
 public class Path {
 
     private static final String SEPARATOR = "/";
-    private StringBuilder value = new StringBuilder();
+    private final StringBuilder value = new StringBuilder();
 
     private Path() {
     }
@@ -44,7 +46,12 @@ public class Path {
         return new Path();
     }
 
-    public static Path fromString(String pathAsString) {
+    public boolean isRoot() {
+        return value.length() < 1;
+    }
+
+    @JsonCreator
+    public static Path fromString(@JsonProperty("value")  String pathAsString) {
         Path path = new Path();
         path.value.append(pathAsString);
         return path;

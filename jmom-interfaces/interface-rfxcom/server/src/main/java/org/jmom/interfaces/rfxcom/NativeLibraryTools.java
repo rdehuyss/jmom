@@ -11,6 +11,8 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.google.common.base.Preconditions.checkState;
+
 public class NativeLibraryTools {
 
 	private static final String RXTX_LIBNAME = System.mapLibraryName("rxtxSerial");
@@ -22,9 +24,14 @@ public class NativeLibraryTools {
 		LOGGER.info("current platform:       " + NativeLibraryTools.getCurrentPlatformIdentifier());
 	}
 
-	public static String getNativeRFXComLookupPath() {
-		return System.getProperty("java.library.path", "").replace(":", ";");
+	public static void loadRXTX() {
+		boolean hasRxTxLibrary = NativeLibraryTools.hasNativeRFXComLibrary();
+		if (!hasRxTxLibrary) {
+			hasRxTxLibrary = NativeLibraryTools.loadEmbeddedLibrary();
+		}
+		checkState(hasRxTxLibrary, "No RxTx library is available.");
 	}
+
 
 	public static boolean hasNativeRFXComLibrary() {
 		try {
@@ -42,6 +49,10 @@ public class NativeLibraryTools {
 		}
 
 		return osName + "/" + System.getProperty("os.arch");
+	}
+
+	public static String getNativeRFXComLookupPath() {
+		return System.getProperty("java.library.path", "").replace(":", ";");
 	}
 
 	public static boolean loadEmbeddedLibrary() {

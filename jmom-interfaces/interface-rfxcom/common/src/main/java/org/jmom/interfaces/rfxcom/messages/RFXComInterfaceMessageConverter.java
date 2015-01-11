@@ -1,14 +1,10 @@
 package org.jmom.interfaces.rfxcom.messages;
 
-import com.google.common.collect.Sets;
-import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.core.model.eda.StateChangedEvent;
-import org.jmom.core.model.things.devices.typelibrary.AbstractChange;
+import org.jmom.core.model.eda.commands.ChangeStateCommand;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 import org.jmom.interfaces.rfxcom.messages.types.PacketType;
 import org.jmom.interfaces.rfxcom.messages.types.RFXComIdentifier;
 import org.jmom.interfaces.rfxcom.messages.types.SubType;
-
-import java.util.Set;
 
 public class RFXComInterfaceMessageConverter implements RFXComMessageConverter {
 

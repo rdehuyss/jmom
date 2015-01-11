@@ -1,7 +1,7 @@
 package org.jmom.core.services.handlers;
 
 import com.google.common.eventbus.Subscribe;
-import org.jmom.core.model.eda.StateChangedEvent;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 import org.jmom.core.infrastucture.cqrs.Repo;
 import org.jmom.core.model.things.StateRepository;
 import org.jmom.core.model.things.StateRepository.UpdateStateChangeDomainEvent;

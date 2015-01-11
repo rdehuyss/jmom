@@ -21,13 +21,11 @@ dependencies {
     compile project(':jmom-core:model')
     compile project(':jmom-core:services')
     compile project(':jmom-interfaces:interface-rfxcom:droid')
-
-    provided libraries.dagger_compiler
 }
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.0.0"
+    buildToolsVersion "21.1.2"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

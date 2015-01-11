@@ -2,24 +2,23 @@ package org.jmom.interfaces.rfxcom;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.AbstractService;
+import org.jmom.core.infrastucture.bus.JMomBus;
 import org.jmom.core.infrastucture.bus.JMomBusAware;
-import org.jmom.core.infrastucture.bus.JMomEventBus;
-import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.core.model.eda.StateChangedEvent;
+import org.jmom.core.model.eda.commands.ChangeStateCommand;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 import org.jmom.core.model.interfacing.InterfaceProvider;
 import org.jmom.interfaces.rfxcom.connector.RFXComConnector;
-import org.jmom.interfaces.rfxcom.messages.RFXComBaseMessage;
-import org.jmom.interfaces.rfxcom.messages.RFXComBaseStateChangeMessage;
-import org.jmom.interfaces.rfxcom.messages.RFXComLighting1MessageConverter;
+import rx.Observable;
 
 public abstract class AbstractRFXComInterfaceProvider extends AbstractService implements InterfaceProvider, RFXComMessageEventListener, JMomBusAware {
 
     public static final String NAME = "RFXCom";
     private RFXComConnection rfxComConnection;
-    private JMomEventBus eventBus;
+    private JMomBus jMomBus;
+    private Observable<StateChangedEvent> stateChanges;
 
-    public AbstractRFXComInterfaceProvider(JMomEventBus eventBus) {
-        this.eventBus = eventBus;
+    public AbstractRFXComInterfaceProvider(JMomBus jMomBus) {
+        this.jMomBus = jMomBus;
     }
 
     @Override
@@ -31,6 +30,8 @@ public abstract class AbstractRFXComInterfaceProvider extends AbstractService im
         rfxComConnection = new RFXComConnection(connector);
         rfxComConnection.setRfxComMessageEventListener(this);
         rfxComConnection.connect();
+        stateChanges = rfxComConnection.stateChanges();
+        stateChanges.subscribe(stateChangedEvent -> System.out.println("Event received in RXJava " + stateChangedEvent.toString()));
     }
 
     @Override
@@ -42,7 +43,7 @@ public abstract class AbstractRFXComInterfaceProvider extends AbstractService im
     @Override
     public void onStateChangedEvent(StateChangedEvent message) {
         if(message.getNewState() != null) {
-            eventBus.post(message);
+            jMomBus.post(message);
         }
     }
 

@@ -1,16 +1,14 @@
 package org.jmom.interfaces.rfxcom.messages;
 
-import com.google.common.collect.Sets;
-import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.core.model.eda.StateChangedEvent;
-import org.jmom.core.model.things.devices.typelibrary.AbstractChange;
+import com.google.common.base.Objects;
+import org.jmom.core.model.eda.commands.ChangeStateCommand;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 import org.jmom.core.model.things.devices.typelibrary.StateChange;
 import org.jmom.interfaces.rfxcom.messages.types.PacketType;
 import org.jmom.interfaces.rfxcom.messages.types.RFXComIdentifier;
 import org.jmom.interfaces.rfxcom.messages.types.SubType;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 public class RFXComTemperatureMessageConverter implements RFXComMessageConverter {
 
@@ -69,7 +67,8 @@ public class RFXComTemperatureMessageConverter implements RFXComMessageConverter
 
         private BigDecimal value;
 
-        protected TemperatureStateChange() {}
+        protected TemperatureStateChange() {
+        }
 
         public TemperatureStateChange(double value) {
             this.value = new BigDecimal(value).setScale(2, BigDecimal.ROUND_DOWN);
@@ -87,6 +86,19 @@ public class RFXComTemperatureMessageConverter implements RFXComMessageConverter
         @Override
         public String toString() {
             return "Temperature = " + value.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(value);
+        }
+
+        @Override
+        public boolean equals(Object that) {
+            if (that instanceof TemperatureStateChange) {
+                return Objects.equal(this.value, ((TemperatureStateChange) that).value);
+            }
+            return false;
         }
     }
 }

@@ -1,43 +1,63 @@
 package org.jmom.apps.android;
 
-import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.ServiceManager;
-import dagger.Module;
-import dagger.Provides;
+import android.content.Context;
+import org.jmom.core.infrastucture.DIGraph;
 import org.jmom.core.infrastucture.JMomInfrastructureModule;
-import org.jmom.core.infrastucture.bus.JMomBusRegistrar;
-import org.jmom.core.infrastucture.qualifiers.DeviceName;
 import org.jmom.core.model.JMomModelModule;
 import org.jmom.core.services.JMomServicesModule;
 
-import javax.inject.Singleton;
 import java.io.File;
-import java.util.Set;
 
-@Module(
-        includes = {JMomInfrastructureModule.class, JMomModelModule.class, JMomServicesModule.class},
-        injects = {TestClass.class, JMomBusRegistrar.class},
-        library = true
-)
+import static org.jmom.core.infrastucture.DIGraph.aDIGraph;
+
 public class AndroidModule {
 
-    @Provides
-    @DeviceName
-    public String deviceName() {
-        return "GSM Ronald";
+    public static class Init {
+
+        private static DIGraph diGraph;
+
+        public static DIGraph diGraph() {
+            if (diGraph == null) {
+                System.out.println("Creating AndroidModule.Init");
+                diGraph = aDIGraph()
+                        .basedOn(JMomInfrastructureModule.Init.diGraph(), JMomModelModule.Init.diGraph(), JMomServicesModule.Init.diGraph())
+                        .register(new File(System.getProperty("java.io.tmpdir"), "jmom-repo"));
+            }
+            return diGraph;
+        }
+
+    }
+
+    public static class Runtime {
+        private static DIGraph diGraph;
+
+        public static DIGraph diGraph() {
+            if (diGraph == null) {
+                System.out.println("Creating AndroidModule.Runtime");
+                diGraph = aDIGraph()
+                        .basedOn(Init.diGraph(), JMomModelModule.Runtime.diGraph(), JMomServicesModule.Runtime.diGraph());
+            }
+            return diGraph;
+        }
+
     }
 
 
-    @Provides
-    @Singleton
-    public File provideDirToStoreAllAggregates() {
-        return new File(System.getProperty("java.io.tmpdir"));
+    private final JMomApplication application;
+
+    public AndroidModule(JMomApplication application) {
+        this.application = application;
     }
 
-    @Provides
-    @Singleton
-    public ServiceManager provideServiceManager(Set<Service> services) {
-        return new ServiceManager(services);
+    /**
+     * Allow the application context to be injected but require that it be annotated with
+     * {@link ForApplication @Annotation} to explicitly differentiate it from an activity context.
+     */
+//    @Provides
+    //  @Singleton
+    //@ForApplication
+    Context provideApplicationContext() {
+        return application;
     }
 
 }

@@ -1,38 +1,41 @@
 package org.jmom.interfaces.rfxcom;
 
-import org.jmom.core.infrastucture.bus.JMomEventBus;
-import org.jmom.core.model.configuration.Configuration;
+import gnu.io.NoSuchPortException;
+import org.jmom.core.infrastucture.bus.JMomBus;
+import org.jmom.core.model.interfacing.Configuration;
+import org.jmom.interfaces.rfxcom.connector.RFXComConnector;
 import org.jmom.interfaces.rfxcom.connector.RFXComSerialConnector;
 
-import static com.google.common.base.Preconditions.checkState;
+import static org.jmom.interfaces.rfxcom.NativeLibraryTools.loadRXTX;
 
 public class RFXComInterfaceProvider extends AbstractRFXComInterfaceProvider {
 
-    public RFXComInterfaceProvider(JMomEventBus eventBus) {
-        super(eventBus);
+    private Configuration configuration;
+
+    public RFXComInterfaceProvider(JMomBus jMomBus) {
+        super(jMomBus);
     }
 
     @Override
     public void configure(Configuration configuration) {
-
+        this.configuration = configuration;
     }
 
     @Override
     protected void doStart() {
         try {
             loadRXTX();
-            initConnection(new RFXComSerialConnector("/dev/ttyUSB0"));
+            initConnection(getConnector());
             notifyStarted();
         } catch (Exception e) {
             notifyFailed(e);
         }
     }
 
-    private void loadRXTX() {
-        boolean hasRxTxLibrary = NativeLibraryTools.hasNativeRFXComLibrary();
-        if (!hasRxTxLibrary) {
-            hasRxTxLibrary = NativeLibraryTools.loadEmbeddedLibrary();
+    private RFXComConnector getConnector() throws NoSuchPortException {
+        if (configuration.contains(RFXComSerialConnector.class.getSimpleName())) {
+            return new RFXComSerialConnector(configuration.get(RFXComSerialConnector.class.getSimpleName()).toString());
         }
-        checkState(hasRxTxLibrary, "No RxTx library is available.");
+        return null;
     }
 }

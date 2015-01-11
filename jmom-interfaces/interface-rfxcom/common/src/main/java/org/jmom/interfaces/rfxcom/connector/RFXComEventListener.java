@@ -16,6 +16,6 @@ public interface RFXComEventListener extends EventListener {
      *
      * @param data Received raw data.
      */
-    void packetReceived(EventObject event, byte[] data);
+    void packetReceived(RFXComMessageReceivedEvent event, byte[] data);
 
 }

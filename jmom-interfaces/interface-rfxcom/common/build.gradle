@@ -1,8 +1,7 @@
 dependencies {
     compile project(':jmom-core:infrastructure')
     compile project(':jmom-core:model')
-
-    provided libraries.dagger_compiler
+    compile 'io.reactivex:rxjava:1.0.4'
 
     testCompile project(path: ':jmom-core:infrastructure', configuration: 'testArtifacts')
     testCompile project(path: ':jmom-core:model', configuration: 'testArtifacts')

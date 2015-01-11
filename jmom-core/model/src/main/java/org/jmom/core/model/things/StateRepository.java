@@ -1,7 +1,7 @@
 package org.jmom.core.model.things;
 
 
-import org.jmom.core.model.eda.StateChangedEvent;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 import org.jmom.core.model.things.devices.DeviceIdentifier;
 import org.jmom.core.infrastucture.cqrs.AggregateRoot;
 import org.jmom.core.infrastucture.cqrs.DomainEvent;
@@ -20,6 +20,10 @@ public class StateRepository extends AggregateRoot {
 
     private void handle(UpdateStateChangeDomainEvent event) {
         stateChanges.put(event.deviceIdentifier.asString(), event.stateChangedEvent);
+    }
+
+    public StateChangedEvent getLastStateChangedEvent(DeviceIdentifier deviceIdentifier) {
+        return stateChanges.get(deviceIdentifier.asString());
     }
 
     public static class UpdateStateChangeDomainEvent implements DomainEvent<StateRepository> {

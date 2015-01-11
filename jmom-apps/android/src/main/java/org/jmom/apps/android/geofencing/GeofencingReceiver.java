@@ -1,7 +1,7 @@
 package org.jmom.apps.android.geofencing;
 
 import android.util.Log;
-import org.jmom.apps.android.NotificationUtils;
+import org.jmom.apps.android.utils.NotificationUtils;
 import org.jmom.apps.android.R;
 
 public class GeofencingReceiver extends ReceiveGeofenceTransitionIntentService {

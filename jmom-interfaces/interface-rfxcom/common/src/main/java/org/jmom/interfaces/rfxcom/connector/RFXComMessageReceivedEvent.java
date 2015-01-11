@@ -5,11 +5,14 @@ import java.util.EventObject;
 public class RFXComMessageReceivedEvent extends EventObject {
 
 
-    public RFXComMessageReceivedEvent(Object source) {
+    private byte[] msg;
+
+    public RFXComMessageReceivedEvent(Object source, byte[] msg) {
         super(source);
+        this.msg = msg;
     }
 
-    public void MessageReceivedEvent(byte[] packet) {
+    public byte[] getMessage() {
+        return msg;
     }
-
 }

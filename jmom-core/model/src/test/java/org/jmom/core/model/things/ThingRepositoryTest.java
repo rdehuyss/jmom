@@ -3,22 +3,21 @@ package org.jmom.core.model.things;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import org.jmom.core.infrastucture.cqrs.Repo;
 import org.jmom.core.infrastucture.serialization.JMomObjectMapper;
-import org.jmom.core.model.eda.SaveThingCommand;
-import org.jmom.core.model.eda.StateChangedEvent;
-import org.jmom.core.model.things.ThingRepository.UpdateOrSaveThingDomainEvent;
+import org.jmom.core.model.eda.commands.DeleteThingCommand;
+import org.jmom.core.model.eda.commands.SaveThingCommand;
+import org.jmom.core.model.eda.events.StateChangedEvent;
+import org.jmom.core.model.eda.commands.UpdateThingCommand;
+import org.jmom.core.model.things.ThingRepository.DeleteThingDomainEvent;
+import org.jmom.core.model.things.ThingRepository.SaveThingDomainEvent;
 import org.jmom.core.model.things.ThingRepository.UpdateStateChangeDomainEvent;
+import org.jmom.core.model.things.ThingRepository.UpdateThingDomainEvent;
 import org.jmom.core.model.things.devices.Device;
 import org.jmom.core.model.things.devices.DeviceIdentifier;
 import org.jmom.core.model.things.devices.Light;
 import org.jmom.core.model.things.devices.typelibrary.OnOffChange;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,11 +28,8 @@ import static org.jmom.core.model.things.Path.fromString;
 import static org.jmom.core.model.things.Thing.byName;
 import static org.jmom.core.model.things.devices.Device.hasDeviceIdentifier;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ThingRepositoryTest {
 
-    @Mock
-    private Repo repo;
     private ThingRepository thingRepository = new ThingRepository();
 
     private Location house;
@@ -56,15 +52,60 @@ public class ThingRepositoryTest {
                 .addIdentifier(new DeviceIdentifier("id-1"))
                 .setState(OnOffChange.ON);
 
-        repo = Mockito.mock(Repo.class);
+        thingRepository.apply(new SaveThingDomainEvent(new SaveThingCommand(Path.root(), house)));
+        thingRepository.apply(new SaveThingDomainEvent(new SaveThingCommand(house, gelijkvloers)));
+        thingRepository.apply(new SaveThingDomainEvent(new SaveThingCommand(house, eersteVerdieping)));
+        thingRepository.apply(new SaveThingDomainEvent(new SaveThingCommand(gelijkvloers, living)));
+        thingRepository.apply(new SaveThingDomainEvent(new SaveThingCommand(gelijkvloers, keuken)));
+        thingRepository.apply(new SaveThingDomainEvent(new SaveThingCommand(gelijkvloers, eetkamer)));
+        thingRepository.apply(new SaveThingDomainEvent(new SaveThingCommand(living, spots)));
+    }
 
-        thingRepository.apply(new UpdateOrSaveThingDomainEvent(new SaveThingCommand(Path.root(), house)));
-        thingRepository.apply(new UpdateOrSaveThingDomainEvent(new SaveThingCommand(house, gelijkvloers)));
-        thingRepository.apply(new UpdateOrSaveThingDomainEvent(new SaveThingCommand(house, eersteVerdieping)));
-        thingRepository.apply(new UpdateOrSaveThingDomainEvent(new SaveThingCommand(gelijkvloers, living)));
-        thingRepository.apply(new UpdateOrSaveThingDomainEvent(new SaveThingCommand(gelijkvloers, keuken)));
-        thingRepository.apply(new UpdateOrSaveThingDomainEvent(new SaveThingCommand(gelijkvloers, eetkamer)));
-        thingRepository.apply(new UpdateOrSaveThingDomainEvent(new SaveThingCommand(living, spots)));
+    @Test
+    public void getByPath_Root() {
+        Optional<ThingTree> root = thingRepository.getByPath(Path.root());
+        ThingTree actual = root.get();
+        List<? extends Thing> children = actual.getChildren();
+        assertThat(children).hasSize(1);
+        assertThat(children.get(0).getName()).isEqualTo("House Pastorijstraat");
+    }
+
+    @Test
+    public void getByPath_UnderLocation() {
+        Optional<ThingTree> thingTree = thingRepository.getByPath(fromString("/House Pastorijstraat"));
+        assertThat(thingTree.get()).isEqualTo(house);
+    }
+
+
+    @Test(expected = IllegalArgumentException.class)
+    public void saveThing_ThingAlreadyExists() {
+        thingRepository.apply(new SaveThingDomainEvent(new SaveThingCommand(living, spots)));
+    }
+
+    @Test
+    public void updateThing_ThingAlreadyExists() {
+        Light nieuweSpots = new Light("Nieuwe Spots")
+                .addIdentifier(new DeviceIdentifier("id-1"))
+                .setState(OnOffChange.ON);
+        thingRepository.apply(new UpdateThingDomainEvent(new UpdateThingCommand(spots.getPath(), keuken.getPath(), nieuweSpots)));
+
+        assertThat(nieuweSpots.getParent()).isNull();
+        assertThat(spots.getParent()).isEqualTo(keuken);
+        assertThat(living.getChildren()).isEmpty();
+        assertThat(spots.getPath().toString()).isEqualTo("/House Pastorijstraat/Gelijkvloers/Keuken/Nieuwe Spots");
+        ImmutableList<Device> devices = this.house.descendantsOrSelf().filter(Device.class).filter(hasDeviceIdentifier(new DeviceIdentifier("id-1"))).toList();
+        assertThat(devices)
+                .hasSize(1)
+                .containsOnly(spots);
+    }
+
+    @Test
+    public void deleteUnderLocation() {
+        thingRepository.apply(new DeleteThingDomainEvent(new DeleteThingCommand(living.getPath())));
+        ImmutableList<Thing> actualLocations = this.house.descendantsOrSelf().filter(instanceOf(Location.class)).toList();
+        assertThat(actualLocations).hasSize(5);
+        Optional<Device> device = this.house.descendantsOrSelf().filter(Device.class).firstMatch(hasDeviceIdentifier(new DeviceIdentifier("id-1")));
+        assertThat(device.isPresent()).isFalse();
     }
 
     @Test
@@ -73,19 +114,6 @@ public class ThingRepositoryTest {
         assertThat(spots.getPath().toString()).isEqualTo("/House Pastorijstraat/Gelijkvloers/Living/Spots");
 
         assertThat(thingRepository.getByPath(fromString("/House Pastorijstraat/Gelijkvloers/Living/Spots")).get()).isEqualTo(spots);
-    }
-
-    @Test
-    public void toJackson() throws IOException {
-        ObjectMapper mapper = new JMomObjectMapper();
-
-        String treeAsString = mapper.writeValueAsString(thingRepository);
-        System.out.println(treeAsString);
-
-        ThingRepository actual = mapper.readValue(treeAsString, ThingRepository.class);
-
-        System.out.println(actual);
-        assertThat(actual.toString()).isEqualTo(thingRepository.toString());
     }
 
     @Test
@@ -100,20 +128,8 @@ public class ThingRepositoryTest {
         assertThat(device).isEqualTo(spots);
     }
 
-    @Test
-    public void saveUnderRoot() {
-        Optional<ThingTree> root = thingRepository.getByPath(Path.root());
-        ThingTree actual = root.get();
-        List<? extends Thing> children = actual.getChildren();
-        assertThat(children).hasSize(1);
-        assertThat(children.get(0).getName()).isEqualTo("House Pastorijstraat");
-    }
 
-    @Test
-    public void saveUnderLocation() {
-        Optional<ThingTree> thingTree = thingRepository.getByPath(fromString("/House Pastorijstraat"));
-        assertThat(thingTree.get()).isEqualTo(house);
-    }
+
 
     @Test
     public void changeState() {
@@ -125,7 +141,7 @@ public class ThingRepositoryTest {
     }
 
     @Test
-    public void changeStateDoesNotChangeVersion() {
+    public void changeStateInMemoryDoesNotChangeVersion() {
         assertThat(thingRepository.getUncommittedChanges()).hasSize(7);
         DeviceIdentifier deviceIdentifier = new DeviceIdentifier("id-1");
         StateChangedEvent stateChangedEvent = new StateChangedEvent(deviceIdentifier, OnOffChange.OFF);
@@ -133,4 +149,16 @@ public class ThingRepositoryTest {
         assertThat(thingRepository.getUncommittedChanges()).hasSize(7);
     }
 
+    @Test
+    public void serializationTest() throws IOException {
+        ObjectMapper mapper = new JMomObjectMapper();
+
+        String treeAsString = mapper.writeValueAsString(thingRepository);
+        System.out.println(treeAsString);
+
+        ThingRepository actual = mapper.readValue(treeAsString, ThingRepository.class);
+
+        System.out.println(actual);
+        assertThat(actual.toString()).isEqualTo(thingRepository.toString());
+    }
 }

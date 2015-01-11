@@ -11,14 +11,28 @@
         android:theme="@style/AppTheme"
         android:name=".JMomApplication">
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:name=".ui.InitActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+                android:name=".ui.discovery.CreateAccountActivity"
+                android:label="Configure JMom"/>
+        <activity
+                android:name=".ui.discovery.CreateResidenceActivity"
+                android:label="Configure JMom"/>
+        <activity
+                android:name=".ui.BrowseLocationActivity"
+                android:label="@string/app_name"/>
+        <activity
+                android:name=".ui.AddOrEditLocationActivity"
+                android:label="Add location"
+                android:parentActivityName=".ui.BrowseLocationActivity" />
 
 
         <service

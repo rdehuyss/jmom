@@ -1,12 +1,10 @@
 dependencies {
-    compile libraries.dagger
     compile libraries.guava
     compile libraries.jackson
     compile libraries.jackson_smile
+    compile libraries.jackson_guava
     compile libraries.joda_time
     compile libraries.slf_api
 
     testCompile libraries.slf_simple
-
-    provided libraries.dagger_compiler
 }

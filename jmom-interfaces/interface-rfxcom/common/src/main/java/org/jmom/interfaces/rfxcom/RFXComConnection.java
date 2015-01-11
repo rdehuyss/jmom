@@ -1,17 +1,19 @@
 package org.jmom.interfaces.rfxcom;
 
-import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.core.model.eda.StateChangedEvent;
+import com.google.common.base.Optional;
+import org.jmom.core.model.eda.commands.ChangeStateCommand;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 import org.jmom.interfaces.rfxcom.connector.RFXComConnector;
 import org.jmom.interfaces.rfxcom.connector.RFXComEventListener;
+import org.jmom.interfaces.rfxcom.connector.RFXComMessageReceivedEvent;
 import org.jmom.interfaces.rfxcom.messages.RFXComMessageConverter;
 import org.jmom.interfaces.rfxcom.messages.RFXComMessageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Observable;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
-import java.util.EventObject;
 
 import static com.google.common.base.Throwables.propagate;
 
@@ -26,6 +28,8 @@ public class RFXComConnection {
     private RFXComMessageEventListener rfxComMessageEventListener;
 
     private RFXComConnector rfxComConnector;
+
+    private Observable<StateChangedEvent> stateChanges;
 
     public RFXComConnection(RFXComConnector rfxComConnector) {
         this.rfxComConnector = rfxComConnector;
@@ -61,6 +65,12 @@ public class RFXComConnection {
         } else {
             rfxComConnector.sendMessage(RFXComMessageFactory.CMD_STATUS);
         }
+
+        stateChanges = rfxComConnector.data()
+                .map(this::toStateChangedEvent)
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+
     }
 
     public void disconnect() {
@@ -80,13 +90,12 @@ public class RFXComConnection {
     private class MessageListener implements RFXComEventListener {
 
         @Override
-        public void packetReceived(EventObject event, byte[] data) {
-            RFXComMessageConverter converter = RFXComMessageFactory.getConverter(data);
-            if (converter != null) {
-                StateChangedEvent message = converter.decodeMessage(data);
-                System.out.println("Data received:\n" + message);
+        public void packetReceived(RFXComMessageReceivedEvent event, byte[] data) {
+            Optional<StateChangedEvent> message = toStateChangedEvent(event);
+            if (message.isPresent()) {
+                System.out.println("Data received:\n" + message.get());
                 if (rfxComMessageEventListener != null) {
-                    rfxComMessageEventListener.onStateChangedEvent(message);
+                    rfxComMessageEventListener.onStateChangedEvent(message.get());
                 }
             } else {
                 System.out.println("Data received:\n" + DatatypeConverter.printHexBinary(data));
@@ -95,4 +104,17 @@ public class RFXComConnection {
 
     }
 
+    private Optional<StateChangedEvent> toStateChangedEvent(RFXComMessageReceivedEvent event) {
+        RFXComMessageConverter converter = RFXComMessageFactory.getConverter(event.getMessage());
+        if (converter != null) {
+            StateChangedEvent message = converter.decodeMessage(event.getMessage());
+            return Optional.of(message);
+        } else {
+            return Optional.absent();
+        }
+    }
+
+    public Observable<StateChangedEvent> stateChanges() {
+        return stateChanges;
+    }
 }

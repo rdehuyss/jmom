@@ -3,14 +3,12 @@ package org.jmom.apps.android;
 import android.widget.Toast;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ServiceManager;
-import org.jmom.core.infrastucture.bus.JMomBusRegistrar;
-import org.jmom.core.infrastucture.bus.JMomCommandBus;
-import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.core.model.eda.StateChangedEvent;
+import org.jmom.apps.android.ui.MainActivity;
+import org.jmom.core.infrastucture.bus.JMomBus;
+import org.jmom.core.model.eda.commands.ChangeStateCommand;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 import org.jmom.core.model.things.StateRepository;
 import org.jmom.core.model.things.ThingRepository;
-
-import javax.inject.Inject;
 
 /**
  * Created by rdehuyss on 25.12.14.
@@ -19,21 +17,17 @@ public class TestClass {
 
     private final ThingRepository thingRepository;
     private final StateRepository stateRepository;
-    private final JMomBusRegistrar jMomBusRegistrar;
-    private final JMomCommandBus commandBus;
+    private final JMomBus jMomBus;
     private final ServiceManager serviceManager;
 
     private MainActivity mainActivity;
 
-    @Inject
-    public TestClass(ThingRepository thingRepository, StateRepository stateRepository, JMomBusRegistrar jMomBusRegistrar, JMomCommandBus commandBus, ServiceManager serviceManager) {
+    public TestClass(ThingRepository thingRepository, StateRepository stateRepository, JMomBus jMomBus, ServiceManager serviceManager) {
         this.thingRepository = thingRepository;
         this.stateRepository = stateRepository;
-        this.jMomBusRegistrar = jMomBusRegistrar;
-        this.commandBus = commandBus;
+        this.jMomBus = jMomBus;
         this.serviceManager = serviceManager;
 
-        jMomBusRegistrar.register(this);
 
         serviceManager.startAsync();
         serviceManager.awaitHealthy();
@@ -42,7 +36,7 @@ public class TestClass {
 
     @Subscribe
     public void stateChanged(StateChangedEvent stateChangedEvent) {
-        if(mainActivity != null) {
+        if (mainActivity != null) {
             mainActivity.runOnUiThread(new Runnable() {
                 public void run() {
                     Toast.makeText(mainActivity, "Event received: " + stateChangedEvent, Toast.LENGTH_SHORT).show();
@@ -57,6 +51,6 @@ public class TestClass {
     }
 
     public void doStateChange(ChangeStateCommand command) {
-        commandBus.post(command);
+        jMomBus.post(command);
     }
 }

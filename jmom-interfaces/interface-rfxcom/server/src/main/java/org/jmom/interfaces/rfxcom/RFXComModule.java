@@ -1,32 +1,40 @@
 package org.jmom.interfaces.rfxcom;
 
-import com.google.common.util.concurrent.Service;
-import dagger.Module;
-import dagger.Provides;
-import org.jmom.core.infrastucture.bus.JMomBusAware;
-import org.jmom.core.infrastucture.bus.JMomEventBus;
+import org.jmom.core.infrastucture.DIGraph;
+import org.jmom.core.infrastucture.bus.JMomBus;
 
-import javax.inject.Singleton;
+import static org.jmom.core.infrastucture.DIGraph.DIRequestBuilder.aDIRequest;
+import static org.jmom.core.infrastucture.DIGraph.aDIGraph;
 
-@Module(
-        library = true,
-        complete = false
-)
 public class RFXComModule {
 
-    @Singleton
-    @Provides
-    public RFXComInterfaceProvider provideRFXComInterface(JMomEventBus eventBus) {
-        return new RFXComInterfaceProvider(eventBus);
+
+    public static class Discovery {
+
+        private static DIGraph diGraph;
+
+        public static DIGraph diGraph() {
+            if (diGraph == null) {
+                diGraph = aDIGraph()
+                        .register(aDIRequest().dependsOn(JMomBus.class).create(diGraph -> new RFXComSerialInterfaceDiscoverer(diGraph.getBean(JMomBus.class))));
+            }
+            return diGraph;
+        }
+
     }
 
-    @Provides(type = Provides.Type.SET)
-    public Service rfxComInterfaceAsService(RFXComInterfaceProvider rfxComInterfaceProvider) {
-        return rfxComInterfaceProvider;
-    }
+    public static class Runtime {
 
-    @Provides(type = Provides.Type.SET)
-    public JMomBusAware rfxComInterfaceAsJMomBusAware(RFXComInterfaceProvider rfxComInterfaceProvider) {
-        return rfxComInterfaceProvider;
+        private static DIGraph diGraph;
+
+        public static DIGraph diGraph() {
+            if (diGraph == null) {
+                diGraph = aDIGraph()
+                        .register(aDIRequest()
+                                .dependsOn(JMomBus.class)
+                                .create(diGraph -> new RFXComInterfaceProvider(diGraph.getBean(JMomBus.class))));
+            }
+            return diGraph;
+        }
     }
 }

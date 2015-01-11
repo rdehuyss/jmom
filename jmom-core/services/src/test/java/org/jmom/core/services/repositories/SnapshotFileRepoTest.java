@@ -1,11 +1,10 @@
 package org.jmom.core.services.repositories;
 
 import org.jmom.core.infrastucture.serialization.JMomObjectMapper;
-import org.jmom.core.model.eda.SaveThingCommand;
+import org.jmom.core.model.eda.commands.SaveThingCommand;
 import org.jmom.core.model.things.Location;
 import org.jmom.core.model.things.Path;
 import org.jmom.core.model.things.ThingRepository;
-import org.jmom.core.model.things.ThingRepository.UpdateOrSaveThingDomainEvent;
 import org.jmom.core.model.things.devices.Light;
 import org.jmom.core.model.things.devices.typelibrary.OnOffChange;
 import org.jmom.core.services.handlers.ThingRepositoryHandler;
@@ -16,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 
 public class SnapshotFileRepoTest {
 

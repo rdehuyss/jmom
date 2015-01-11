@@ -1,7 +1,6 @@
 package org.jmom.interfaces.rfxcom;
 
-import org.jmom.core.model.eda.StateChangedEvent;
-import org.jmom.interfaces.rfxcom.messages.RFXComBaseMessage;
+import org.jmom.core.model.eda.events.StateChangedEvent;
 
 import java.util.EventListener;
 

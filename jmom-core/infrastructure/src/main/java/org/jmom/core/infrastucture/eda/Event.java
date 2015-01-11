@@ -1,10 +1,6 @@
 package org.jmom.core.infrastucture.eda;
 
-import org.joda.time.Instant;
-
-import java.util.UUID;
-
-public abstract class Event extends Change {
+public abstract class Event extends Message {
 
     public Event() {
         super(null);

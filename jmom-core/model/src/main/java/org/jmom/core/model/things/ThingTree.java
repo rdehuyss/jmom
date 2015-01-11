@@ -22,7 +22,11 @@ public class ThingTree<T extends ThingTree<T>> extends Thing<T> {
     }
 
     protected ThingTree(String name) {
-        super(name);
+        this(name, null);
+    }
+
+    protected ThingTree(String name, String description) {
+        super(name, description);
         this.children = new LinkedList<Thing>();
     }
 

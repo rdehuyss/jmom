@@ -1,7 +1,6 @@
 package org.jmom.interfaces.rfxcom.messages;
 
-import org.jmom.core.model.eda.ChangeStateCommand;
-import org.jmom.interfaces.rfxcom.RFXComException;
+import org.jmom.core.model.eda.commands.ChangeStateCommand;
 import org.jmom.interfaces.rfxcom.messages.types.PacketType;
 import org.jmom.interfaces.rfxcom.messages.types.RFXComIdentifier;
 

@@ -4,6 +4,8 @@ package org.jmom.interfaces.rfxcom.connector;
 import gnu.io.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.Observable;
+import rx.subjects.PublishSubject;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
@@ -22,22 +24,23 @@ public class RFXComSerialConnector implements RFXComConnector {
     private List<RFXComEventListener> listeners = new ArrayList<RFXComEventListener>();
 
 
-    private String usbDeviceName;
+    private final CommPortIdentifier portIdentifier;
     private InputStream in = null;
     private OutputStream out = null;
     private SerialPort serialPort = null;
     private Thread readerThread = null;
+    private PublishSubject<RFXComMessageReceivedEvent> data = PublishSubject.create();
 
-    public RFXComSerialConnector(String usbDeviceName) {
-        this.usbDeviceName = usbDeviceName;
+    public RFXComSerialConnector(String commPortName) throws NoSuchPortException {
+        this(CommPortIdentifier.getPortIdentifier(commPortName));
+    }
+
+    public RFXComSerialConnector(CommPortIdentifier commPortIdentifier) {
+        portIdentifier = commPortIdentifier;
     }
 
     @Override
     public void connect() throws NoSuchPortException, PortInUseException, UnsupportedCommOperationException, IOException {
-        logger.info("Connecting to RFXCOM [serialPort='{}' ].", new Object[]{serialPort});
-
-        CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(usbDeviceName);
-
         CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);
 
         serialPort = (SerialPort) commPort;
@@ -101,6 +104,11 @@ public class RFXComSerialConnector implements RFXComConnector {
     public void sendMessage(byte[] data) throws IOException {
         out.write(data);
         out.flush();
+    }
+
+    @Override
+    public Observable<RFXComMessageReceivedEvent> data() {
+        return data;
     }
 
     public synchronized void addEventListener(RFXComEventListener rfxComEventListener) {
@@ -175,14 +183,17 @@ public class RFXComSerialConnector implements RFXComConnector {
                                     msg[j] = dataBuffer[j];
                                 }
 
-                                RFXComMessageReceivedEvent event = new RFXComMessageReceivedEvent(this);
+                                RFXComMessageReceivedEvent event = new RFXComMessageReceivedEvent(this, msg);
 
                                 try {
+
                                     System.out.println("Notifying event listeners");
                                     Iterator<RFXComEventListener> iterator = listeners.iterator();
                                     while (iterator.hasNext()) {
                                         iterator.next().packetReceived(event, msg);
                                     }
+
+                                    data.onNext(event);
 
                                 } catch (Exception e) {
                                     System.out.println("Event listener invoking error");

@@ -1,6 +1,4 @@
 dependencies {
     compile project(':jmom-interfaces:interface-rfxcom:common')
     compile "org.rxtx:rxtx:2.2"
-
-    provided libraries.dagger_compiler
 }

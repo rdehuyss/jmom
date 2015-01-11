@@ -1,5 +1,8 @@
 package org.jmom.interfaces.rfxcom.connector;
 
+import rx.Observable;
+import rx.Observer;
+
 import java.io.IOException;
 
 /**
@@ -30,6 +33,8 @@ public interface RFXComConnector {
      *            raw bytes.
      */
     public void sendMessage(byte[] data) throws IOException;
+
+    public Observable<RFXComMessageReceivedEvent> data();
 
     /**
      * Procedure for register event listener.

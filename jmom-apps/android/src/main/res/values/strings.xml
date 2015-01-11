@@ -7,4 +7,10 @@
     <string name="start_taking_orders">Start taking orders</string>
     <string name="stop_taking_orders">Stop taking orders</string>
 
+    <string-array
+            name="menu">
+        <item>Edit</item>
+        <item>Delete</item>
+    </string-array>
+
 </resources>
